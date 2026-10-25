@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+/* `dark:` follows the app's own toggle (data-theme on <html>), not the OS. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* --------------------------------------------------------------------------
+   Theme tokens. Values switch per theme below; Tailwind classes reference
+   them by role (bg-glass, text-ink-2, border-line …), so components never
+   hard-code a theme.
+   -------------------------------------------------------------------------- */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --sa-page: #070b16;
+  --sa-blob-1: rgb(45 212 191 / 0.20);
+  --sa-blob-2: rgb(99 102 241 / 0.24);
+  --sa-blob-3: rgb(168 85 247 / 0.14);
+  --sa-dot: rgb(255 255 255 / 0.035);
+
+  --sa-glass: rgb(255 255 255 / 0.045);
+  --sa-glass-strong: rgb(255 255 255 / 0.075);
+  --sa-glass-solid: rgb(17 24 42 / 0.88);
+  --sa-glass-border: rgb(255 255 255 / 0.09);
+  --sa-highlight: rgb(255 255 255 / 0.07);
+  --sa-line: rgb(255 255 255 / 0.07);
+  --sa-hover: rgb(255 255 255 / 0.05);
+  --sa-field: rgb(255 255 255 / 0.04);
+  --sa-field-border: rgb(255 255 255 / 0.10);
+  --sa-overlay: rgb(3 6 14 / 0.62);
+
+  --sa-ink: #eef2ff;
+  --sa-ink-2: #a8b3cc;
+  --sa-ink-3: #6d7a96;
+
+  --sa-accent: #2dd4bf;
+  --sa-accent-2: #818cf8;
+  --sa-accent-ink: #5eead4;
+  --sa-grad-from: #2dd4bf;
+  --sa-grad-to: #6366f1;
+
+  /* Single-series chart hue, validated against the dark glass surface. */
+  --sa-chart: #12a594;
+  --sa-chart-grid: rgb(255 255 255 / 0.06);
+
+  --sa-good: #34d399;
+  --sa-warn: #fbbf24;
+  --sa-bad: #fb7185;
+  --sa-info: #60a5fa;
+  --sa-violet: #a78bfa;
+  --sa-cyan: #22d3ee;
+
+  --sa-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.65);
+  --sa-shadow-sm: 0 6px 20px -10px rgb(0 0 0 / 0.6);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --sa-page: #eef2f8;
+  --sa-blob-1: rgb(45 212 191 / 0.26);
+  --sa-blob-2: rgb(129 140 248 / 0.28);
+  --sa-blob-3: rgb(244 114 182 / 0.16);
+  --sa-dot: rgb(15 23 42 / 0.05);
+
+  --sa-glass: rgb(255 255 255 / 0.58);
+  --sa-glass-strong: rgb(255 255 255 / 0.80);
+  --sa-glass-solid: rgb(255 255 255 / 0.94);
+  --sa-glass-border: rgb(255 255 255 / 0.9);
+  --sa-highlight: rgb(255 255 255 / 0.95);
+  --sa-line: rgb(15 23 42 / 0.07);
+  --sa-hover: rgb(15 23 42 / 0.035);
+  --sa-field: rgb(255 255 255 / 0.7);
+  --sa-field-border: rgb(15 23 42 / 0.10);
+  --sa-overlay: rgb(15 23 42 / 0.32);
+
+  --sa-ink: #0f172a;
+  --sa-ink-2: #475569;
+  --sa-ink-3: #64748b;
+
+  --sa-accent: #0d9488;
+  --sa-accent-2: #4f46e5;
+  --sa-accent-ink: #0f766e;
+  --sa-grad-from: #14b8a6;
+  --sa-grad-to: #6366f1;
+
+  --sa-chart: #0d9488;
+  --sa-chart-grid: rgb(15 23 42 / 0.07);
+
+  --sa-good: #059669;
+  --sa-warn: #b45309;
+  --sa-bad: #e11d48;
+  --sa-info: #2563eb;
+  --sa-violet: #7c3aed;
+  --sa-cyan: #0891b2;
+
+  --sa-shadow: 0 20px 50px -24px rgb(30 41 79 / 0.28), 0 0 0 1px rgb(15 23 42 / 0.04);
+  --sa-shadow-sm: 0 8px 24px -14px rgb(30 41 79 / 0.3), 0 0 0 1px rgb(15 23 42 / 0.04);
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-page: var(--sa-page);
+  --color-glass: var(--sa-glass);
+  --color-glass-strong: var(--sa-glass-strong);
+  --color-glass-solid: var(--sa-glass-solid);
+  --color-glass-border: var(--sa-glass-border);
+  --color-highlight: var(--sa-highlight);
+  --color-line: var(--sa-line);
+  --color-hover: var(--sa-hover);
+  --color-field: var(--sa-field);
+  --color-field-border: var(--sa-field-border);
+  --color-overlay: var(--sa-overlay);
+
+  --color-ink: var(--sa-ink);
+  --color-ink-2: var(--sa-ink-2);
+  --color-ink-3: var(--sa-ink-3);
+
+  --color-accent: var(--sa-accent);
+  --color-accent-2: var(--sa-accent-2);
+  --color-accent-ink: var(--sa-accent-ink);
+  --color-chart: var(--sa-chart);
+  --color-chart-grid: var(--sa-chart-grid);
+
+  --color-good: var(--sa-good);
+  --color-warn: var(--sa-warn);
+  --color-bad: var(--sa-bad);
+  --color-info: var(--sa-info);
+  --color-violet: var(--sa-violet);
+  --color-cyan: var(--sa-cyan);
+
+  --shadow-glass: inset 0 1px 0 var(--sa-highlight), var(--sa-shadow);
+  --shadow-glass-sm: inset 0 1px 0 var(--sa-highlight), var(--sa-shadow-sm);
+  --shadow-glow: 0 10px 24px -10px rgb(45 212 191 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.25);
+
+  --animate-drift: drift 26s ease-in-out infinite alternate;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-pop: pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  --animate-slide-in: slide-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  --animate-fade-in: fade-in 0.2s ease;
+
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(4vw, 3vh) scale(1.08); }
+    100% { transform: translate(-3vw, -2vh) scale(0.96); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(40px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The few things utilities can't express on their own.
+   -------------------------------------------------------------------------- */
+
+/* Frosted panel: translucent fill, hairline border, top highlight, blur. */
+@utility glass {
+  background-color: var(--sa-glass);
+  border: 1px solid var(--sa-glass-border);
+  box-shadow: inset 0 1px 0 var(--sa-highlight), var(--sa-shadow);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+/* Same panel, nearly opaque — for modals, drawers, toasts and the mobile
+   sidebar, which sit over busy content rather than the aurora. */
+@utility glass-solid {
+  background-color: var(--sa-glass-solid);
+  border: 1px solid var(--sa-glass-border);
+  box-shadow: inset 0 1px 0 var(--sa-highlight), var(--sa-shadow);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+@utility bg-brand {
+  background-image: linear-gradient(135deg, var(--sa-grad-from) 0%, var(--sa-grad-to) 100%);
+}
+
+@utility text-brand {
+  background-image: linear-gradient(135deg, var(--sa-grad-from) 0%, var(--sa-grad-to) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(var(--sa-dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
+}
+
+@utility skeleton {
+  background-image: linear-gradient(90deg, var(--sa-hover) 0%, var(--sa-glass-strong) 50%, var(--sa-hover) 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+@layer base {
+  html, body, #root { min-height: 100%; }
+  body {
+    @apply bg-page text-ink font-sans text-sm antialiased;
+    transition: background-color 0.4s ease, color 0.3s ease;
+  }
+  ::selection { background: color-mix(in srgb, var(--sa-accent) 25%, transparent); }
+  :focus-visible { outline: 2px solid var(--sa-accent); outline-offset: 2px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--sa-line);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  select option { background: var(--sa-page); color: var(--sa-ink); }
+  input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; }
+  [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
