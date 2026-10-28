@@ -8,10 +8,10 @@ export const cx = (...c) => c.filter(Boolean).join(' ');
 // --- Shared class recipes ----------------------------------------------------
 
 export const inputCls =
-  'w-full h-[42px] px-3.5 rounded-xl border border-field-border bg-field text-ink text-sm placeholder:text-ink-3 ' +
-  'transition focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/15';
+  'w-full h-10 px-3 rounded-lg border border-field-border bg-field text-ink text-sm placeholder:text-ink-3 ' +
+  'transition focus:outline-none focus:border-accent focus:ring-3 focus:ring-accent/15';
 
-export const TH = 'text-left text-[11px] font-extrabold uppercase tracking-[0.08em] text-ink-3 px-4 py-3 border-b border-line whitespace-nowrap bg-hover';
+export const TH = 'text-left text-[11px] font-semibold uppercase tracking-wider text-ink-3 px-4 py-3 border-b border-line whitespace-nowrap bg-page';
 export const TD = 'px-4 py-3 border-b border-line align-middle';
 export const TR = 'transition-colors hover:bg-hover [&:last-child>td]:border-b-0';
 
@@ -30,14 +30,14 @@ export const toneCls = (tone) => TONES[tone] || TONES.muted;
 // --- Primitives -------------------------------------------------------------
 
 export function Card({ className = '', children, ...props }) {
-  return <div className={cx('glass rounded-[22px]', className)} {...props}>{children}</div>;
+  return <div className={cx('glass rounded-xl', className)} {...props}>{children}</div>;
 }
 
 export function CardHead({ title, sub, children }) {
   return (
     <div className="flex items-center justify-between gap-3 mb-4.5">
       <div>
-        <div className="text-[15px] font-bold">{title}</div>
+        <div className="text-[15px] font-semibold">{title}</div>
         {sub && <div className="text-[12.5px] text-ink-3 mt-0.5">{sub}</div>}
       </div>
       {children}
@@ -46,8 +46,8 @@ export function CardHead({ title, sub, children }) {
 }
 
 const BTN_VARIANTS = {
-  default: 'border-field-border bg-glass-strong text-ink hover:bg-hover hover:border-ink-3',
-  primary: 'border-transparent text-white bg-brand shadow-glow hover:brightness-110',
+  default: 'border-field-border bg-glass-strong text-ink shadow-glass-sm hover:bg-hover',
+  primary: 'border-transparent text-white bg-brand shadow-glow hover:bg-brand-fill-hover',
   ghost: 'border-transparent bg-transparent text-ink-2 hover:bg-hover hover:text-ink',
   danger: 'text-bad bg-bad/10 border-bad/30 hover:border-bad',
   success: 'text-good bg-good/10 border-good/30 hover:border-good',
@@ -57,9 +57,9 @@ export function Button({ variant = 'default', size = 'md', loading = false, icon
   return (
     <button
       className={cx(
-        'inline-flex items-center justify-center gap-2 border font-bold whitespace-nowrap cursor-pointer transition',
-        'active:scale-[0.98] disabled:opacity-55 disabled:cursor-not-allowed disabled:active:scale-100',
-        size === 'sm' ? 'h-[34px] px-3 text-[12.5px] rounded-[10px]' : 'h-10 px-4 text-[13.5px] rounded-xl',
+        'inline-flex items-center justify-center gap-2 border font-semibold whitespace-nowrap cursor-pointer transition-colors',
+        'disabled:opacity-55 disabled:cursor-not-allowed',
+        size === 'sm' ? 'h-8 px-3 text-[12.5px] rounded-md' : 'h-10 px-4 text-[13.5px] rounded-lg',
         BTN_VARIANTS[variant],
         className
       )}
@@ -77,8 +77,8 @@ export function IconButton({ icon: Icon, label, size = 'md', plain = false, clas
     <button
       className={cx(
         'inline-grid place-items-center shrink-0 border cursor-pointer text-ink-2 transition hover:text-ink disabled:opacity-40 disabled:cursor-not-allowed',
-        size === 'sm' ? 'size-8 rounded-[10px]' : 'size-10 rounded-xl',
-        plain ? 'border-transparent bg-transparent hover:bg-hover' : 'border-field-border bg-glass-strong hover:border-ink-3',
+        size === 'sm' ? 'size-8 rounded-md' : 'size-10 rounded-lg',
+        plain ? 'border-transparent bg-transparent hover:bg-hover' : 'border-field-border bg-glass-strong hover:bg-hover',
         className
       )}
       aria-label={label}
@@ -92,8 +92,8 @@ export function IconButton({ icon: Icon, label, size = 'md', plain = false, clas
 
 export function Badge({ tone = 'muted', dot = true, children }) {
   return (
-    <span className={cx('inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border text-[11.5px] font-bold whitespace-nowrap', toneCls(tone))}>
-      {dot && <span className="size-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]" />}
+    <span className={cx('inline-flex items-center gap-1.5 h-6 px-2 rounded-md border text-[11.5px] font-semibold whitespace-nowrap', toneCls(tone))}>
+      {dot && <span className="size-1.5 rounded-full bg-current" />}
       {children}
     </span>
   );
@@ -110,9 +110,9 @@ export function ActiveBadge({ active }) {
 
 export function Avatar({ name, src, size = 'md' }) {
   const isUrl = typeof src === 'string' && /^https?:\/\//.test(src);
-  const dims = { sm: 'size-8 rounded-[10px] text-[11px]', md: 'size-9 rounded-[11px] text-[13px]', lg: 'size-14 rounded-[17px] text-lg' }[size];
+  const dims = { sm: 'size-8 rounded-full text-[11px]', md: 'size-9 rounded-full text-[13px]', lg: 'size-14 rounded-xl text-lg' }[size];
   return (
-    <div className={cx('grid place-items-center shrink-0 font-extrabold text-white bg-brand overflow-hidden', dims)} aria-hidden="true">
+    <div className={cx('grid place-items-center shrink-0 font-semibold text-accent-ink bg-accent/12 overflow-hidden', dims)} aria-hidden="true">
       {isUrl ? <img src={src} alt="" className="size-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : initials(name)}
     </div>
   );
@@ -125,8 +125,8 @@ export function Skeleton({ className = 'h-3.5 w-full' }) {
 export function Empty({ icon: Icon = Inbox, title = 'Nothing here yet', children }) {
   return (
     <div className="flex flex-col items-center justify-center text-center gap-2.5 px-5 py-13 text-ink-3">
-      <div className="size-14 rounded-[18px] grid place-items-center bg-hover border border-line"><Icon size={24} /></div>
-      <div className="font-extrabold text-ink text-[15px]">{title}</div>
+      <div className="size-12 rounded-xl grid place-items-center bg-hover border border-line"><Icon size={22} /></div>
+      <div className="font-semibold text-ink text-[15px]">{title}</div>
       {children && <div>{children}</div>}
     </div>
   );
@@ -143,7 +143,7 @@ export function ErrorState({ message, onRetry }) {
 
 export function Alert({ tone = 'bad', icon: Icon = AlertTriangle, children }) {
   return (
-    <div className={cx('flex gap-2.5 items-start px-3.5 py-3 rounded-[13px] border text-[13px] font-semibold', toneCls(tone))} role="alert">
+    <div className={cx('flex gap-2.5 items-start px-3.5 py-3 rounded-lg border text-[13px] font-medium', toneCls(tone))} role="alert">
       <Icon size={16} className="shrink-0 mt-px" />
       <div>{children}</div>
     </div>
@@ -156,7 +156,7 @@ export function Field({ label, required, hint, error, children, className = '' }
   return (
     <label className={cx('flex flex-col gap-1.5 min-w-0', className)}>
       {label && (
-        <span className="text-[12.5px] font-bold text-ink-2">
+        <span className="text-[12.5px] font-medium text-ink-2">
           {label}{required && <span className="text-bad ml-0.5">*</span>}
         </span>
       )}
@@ -190,7 +190,7 @@ export function SearchInput({ className = '', ...props }) {
 
 export function Segmented({ value, onChange, options }) {
   return (
-    <div className="inline-flex p-1 gap-0.5 rounded-[13px] bg-field border border-field-border" role="tablist">
+    <div className="inline-flex p-1 gap-0.5 rounded-lg bg-page border border-field-border" role="tablist">
       {options.map((o) => {
         const on = value === o.value;
         return (
@@ -201,8 +201,8 @@ export function Segmented({ value, onChange, options }) {
             aria-selected={on}
             onClick={() => onChange(o.value)}
             className={cx(
-              'inline-flex items-center gap-1.5 h-8 px-3.5 rounded-[9px] text-[12.5px] font-bold cursor-pointer transition',
-              on ? 'text-ink bg-glass-strong shadow-glass-sm' : 'text-ink-3 hover:text-ink'
+              'inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-semibold cursor-pointer transition-colors',
+              on ? 'text-accent-ink bg-glass-strong shadow-glass-sm' : 'text-ink-3 hover:text-ink'
             )}
           >
             {o.label}
@@ -220,7 +220,7 @@ export function PageHead({ title, sub, children }) {
   return (
     <div className="flex items-end justify-between gap-4 flex-wrap mb-5.5">
       <div>
-        <h1 className="text-[23px] sm:text-[28px] font-extrabold tracking-[-0.035em]">{title}</h1>
+        <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight">{title}</h1>
         {sub && <p className="text-ink-2 mt-1">{sub}</p>}
       </div>
       {children && <div className="flex items-center gap-2.5 flex-wrap">{children}</div>}
@@ -251,7 +251,7 @@ export function Entity({ name, sub, src, size = 'md' }) {
     <div className="flex items-center gap-3 min-w-0">
       <Avatar name={name} src={src} size={size} />
       <div className="min-w-0">
-        <div className="font-bold text-ink truncate">{name || '—'}</div>
+        <div className="font-semibold text-ink truncate">{name || '—'}</div>
         {sub && <div className="text-xs text-ink-3 truncate">{sub}</div>}
       </div>
     </div>
@@ -290,8 +290,8 @@ export function Pager({ pagination, onPage, noun = 'records' }) {
                 onClick={() => onPage(p)}
                 aria-current={p === page ? 'page' : undefined}
                 className={cx(
-                  'min-w-8 h-8 px-2 rounded-[10px] border font-bold tabular-nums cursor-pointer transition',
-                  p === page ? 'text-ink bg-glass-strong border-field-border' : 'text-ink-2 border-transparent hover:bg-hover'
+                  'min-w-8 h-8 px-2 rounded-md border font-semibold tabular-nums cursor-pointer transition-colors',
+                  p === page ? 'text-white bg-brand border-transparent' : 'text-ink-2 border-transparent hover:bg-hover'
                 )}
               >
                 {p}
@@ -325,7 +325,7 @@ function OverlayFrame({ id, title, subtitle, onClose, footer, children }) {
     <>
       <div className="flex items-start justify-between gap-3 px-6 pt-5.5 pb-4 border-b border-line">
         <div>
-          <div className="text-lg font-extrabold" id={id}>{title}</div>
+          <div className="text-lg font-semibold" id={id}>{title}</div>
           {subtitle && <div className="text-[13px] text-ink-3 mt-0.5">{subtitle}</div>}
         </div>
         <IconButton icon={X} label="Close" size="sm" plain onClick={onClose} />
@@ -341,11 +341,11 @@ export function Modal({ size = 'md', ...props }) {
   const id = useId();
   return createPortal(
     <div
-      className="fixed inset-0 z-100 grid place-items-center p-5 bg-overlay backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-100 grid place-items-center p-5 bg-overlay animate-fade-in"
       onMouseDown={(e) => e.target === e.currentTarget && props.onClose?.()}
     >
       <div
-        className={cx('glass-solid rounded-[22px] flex flex-col w-full max-h-[calc(100vh-40px)] animate-pop', size === 'sm' ? 'max-w-[440px]' : 'max-w-[720px]')}
+        className={cx('glass-solid rounded-xl flex flex-col w-full max-h-[calc(100vh-40px)] animate-pop', size === 'sm' ? 'max-w-[440px]' : 'max-w-[720px]')}
         role="dialog"
         aria-modal="true"
         aria-labelledby={id}
@@ -362,10 +362,10 @@ export function Drawer(props) {
   const id = useId();
   return createPortal(
     <div
-      className="fixed inset-0 z-100 flex justify-end p-3 bg-overlay backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-100 flex justify-end bg-overlay animate-fade-in"
       onMouseDown={(e) => e.target === e.currentTarget && props.onClose?.()}
     >
-      <aside className="glass-solid rounded-[22px] flex flex-col w-full max-w-[560px] h-full animate-slide-in" role="dialog" aria-modal="true" aria-labelledby={id}>
+      <aside className="glass-solid border-y-0 border-r-0 flex flex-col w-full max-w-[560px] h-full animate-slide-in" role="dialog" aria-modal="true" aria-labelledby={id}>
         <OverlayFrame id={id} {...props} />
       </aside>
     </div>,
@@ -393,16 +393,15 @@ export function Confirm({ title, message, confirmLabel = 'Confirm', tone = 'prim
 
 // --- Data display ------------------------------------------------------------------
 
-// `tone` is a CSS color (e.g. 'var(--sa-info)'); drives the icon chip and corner glow.
+// `tone` is a CSS color (e.g. 'var(--sa-info)'); drives the icon chip.
 export function StatCard({ icon: Icon, label, value, tone = 'var(--sa-accent)', loading, foot }) {
   return (
-    <Card className="relative overflow-hidden p-4 sm:p-5 flex flex-col gap-3.5 transition-transform duration-300 hover:-translate-y-0.5" style={{ '--tone': tone }}>
-      <div className="absolute -right-10 -top-10 size-36 rounded-full bg-(--tone) opacity-[0.12] blur-[30px] pointer-events-none" />
-      <IconChip icon={Icon} />
-      <div>
-        {loading ? <Skeleton className="h-8 w-24 mb-1" /> : <div className="text-[26px] sm:text-[30px] font-extrabold tracking-[-0.04em] leading-tight tabular-nums">{value}</div>}
-        <div className="text-[13px] text-ink-2 font-semibold">{label}</div>
+    <Card className="p-4 sm:p-5 flex flex-col gap-3" style={{ '--tone': tone }}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[13px] text-ink-2 font-medium">{label}</div>
+        <IconChip icon={Icon} size="sm" />
       </div>
+      {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-[26px] sm:text-[28px] font-bold tracking-tight leading-tight tabular-nums">{value}</div>}
       {foot && <div className="text-xs text-ink-3 flex gap-2.5 flex-wrap [&_b]:text-ink-2 [&_b]:font-bold">{foot}</div>}
     </Card>
   );
@@ -413,12 +412,12 @@ export function IconChip({ icon: Icon, size = 'md' }) {
   return (
     <div
       className={cx(
-        'grid place-items-center shrink-0 text-(--tone,var(--sa-accent)) border',
-        'bg-[color-mix(in_srgb,var(--tone,var(--sa-accent))_14%,transparent)] border-[color-mix(in_srgb,var(--tone,var(--sa-accent))_22%,transparent)]',
-        size === 'sm' ? 'size-9.5 rounded-xl' : 'size-10.5 rounded-[13px]'
+        'grid place-items-center shrink-0 text-(--tone,var(--sa-accent))',
+        'bg-[color-mix(in_srgb,var(--tone,var(--sa-accent))_12%,transparent)]',
+        size === 'sm' ? 'size-9 rounded-lg' : 'size-10 rounded-lg'
       )}
     >
-      <Icon size={size === 'sm' ? 18 : 20} />
+      <Icon size={size === 'sm' ? 17 : 19} />
     </div>
   );
 }
@@ -428,7 +427,7 @@ export function KV({ items }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4.5 gap-y-3.5">
       {items.filter(Boolean).map(([k, v, span]) => (
         <div key={k} className={cx('min-w-0', span && 'sm:col-span-2')}>
-          <div className="text-[11.5px] text-ink-3 font-bold uppercase tracking-[0.06em]">{k}</div>
+          <div className="text-[11.5px] text-ink-3 font-medium uppercase tracking-wider">{k}</div>
           <div className="font-semibold mt-0.5 break-words">{v || v === 0 ? v : '—'}</div>
         </div>
       ))}
@@ -438,7 +437,7 @@ export function KV({ items }) {
 
 export function SectionTitle({ icon: Icon, children }) {
   return (
-    <div className="text-[13px] font-extrabold mt-5.5 mb-3 flex items-center gap-2">
+    <div className="text-[13px] font-semibold mt-5.5 mb-3 flex items-center gap-2">
       {Icon && <Icon size={15} className="text-ink-3" />}
       {children}
     </div>

@@ -1,21 +1,62 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, ArrowUpRight, BedDouble, CalendarCheck, CalendarDays, Hash, KeyRound, Mail, MapPin, Pencil, Phone, Power,
   PowerOff, Stethoscope, Users,
 } from 'lucide-react';
 import { useApi } from '../lib/hooks';
-import { STATUS_ORDER, fmtDate, fmtMoney, fmtNum } from '../lib/format';
+import { STATUS_ORDER, fmtDate, fmtMoney, fmtNum, localISODate } from '../lib/format';
 import {
-  ActiveBadge, Avatar, Badge, Button, Card, CardHead, Empty, ErrorState, Skeleton, StatCard, StatusBadge,
+  ActiveBadge, Avatar, Badge, Button, Card, CardHead, Empty, ErrorState, Input, Segmented, Skeleton, StatCard, StatusBadge,
 } from '../components/ui';
 import { BarList } from '../components/charts';
 import { AppointmentDrawer, AppointmentRows } from '../components/Appointments';
 import { useHospitalActions } from '../components/useHospitalActions';
+import { PERIODS, fmtPeriod, periodRange, tzOffsetMinutes } from '../lib/periods';
+
+// The chosen range lives in the URL (?range=&from=&to=) so it survives a
+// refresh and can be shared. Returns the YYYY-MM-DD bounds to query, or
+// an `invalid` message for an unfinished custom range.
+function usePeriod() {
+  const [params, setParams] = useSearchParams();
+  const range = PERIODS.some((r) => r.value === params.get('range')) ? params.get('range') : 'all';
+  const custom = { from: params.get('from') || '', to: params.get('to') || '' };
+
+  const update = (changes) => {
+    const next = new URLSearchParams(params);
+    Object.entries(changes).forEach(([k, v]) => (v ? next.set(k, v) : next.delete(k)));
+    setParams(next, { replace: true });
+  };
+
+  let fromDate = '';
+  let toDate = '';
+  let invalid = '';
+  if (range === 'custom') {
+    if (!custom.from || !custom.to) invalid = 'Pick a start and end date.';
+    else if (custom.from > custom.to) invalid = 'The start date must be on or before the end date.';
+    else ({ from: fromDate, to: toDate } = custom);
+  } else {
+    [fromDate, toDate] = periodRange(range);
+  }
+
+  return {
+    range, custom, fromDate, toDate, invalid,
+    setRange: (value) => update({ range: value === 'all' ? '' : value }),
+    setCustom: (key, value) => update({ [key]: value }),
+  };
+}
 
 export default function HospitalDetail() {
   const { id } = useParams();
-  const { data, loading, error, reload } = useApi('superadmin/hospitals/detail', { hospitalId: id });
+  const period = usePeriod();
+  const body = { hospitalId: id, tzOffsetMinutes: tzOffsetMinutes() };
+  if (period.fromDate) Object.assign(body, { fromDate: period.fromDate, toDate: period.toDate });
+  // An unfinished custom range keeps showing the last valid result.
+  const [lastBody, setLastBody] = useState(body);
+  const activeBody = period.invalid ? lastBody : body;
+  if (!period.invalid && JSON.stringify(body) !== JSON.stringify(lastBody)) setLastBody(body);
+
+  const { data, loading, error, reload } = useApi('superadmin/hospitals/detail', activeBody);
   const { open, dialogs } = useHospitalActions(reload);
   const [openAppt, setOpenAppt] = useState(null);
 
@@ -29,8 +70,16 @@ export default function HospitalDetail() {
 
   const h = data?.hospital;
   const s = data?.stats || {};
+  // Older backends send no `period`: fall back to the all-time figures.
+  const p = data?.period || {
+    appointments: s.totalAppointments, uniquePatients: s.uniquePatients, byStatus: s.byStatus, ipdAdmissions: s.admittedIpdPatients,
+  };
   const first = loading && !data;
+  const refreshing = loading && !first;
   const specs = h ? (Array.isArray(h.specialization) ? h.specialization : [h.specialization]).filter(Boolean) : [];
+  const shown = fmtPeriod(activeBody.fromDate, activeBody.toDate);
+  const inPeriod = activeBody.fromDate ? 'in this period' : 'all time';
+  const rangeQuery = activeBody.fromDate ? `&fromDate=${activeBody.fromDate}&toDate=${activeBody.toDate}` : '';
 
   return (
     <>
@@ -39,13 +88,12 @@ export default function HospitalDetail() {
       </Link>
 
       <Card className="relative overflow-hidden p-6 flex items-center gap-4.5 flex-wrap">
-        <div className="absolute -right-24 -top-24 size-72 rounded-full bg-brand opacity-[0.12] blur-[60px] pointer-events-none" />
-        {first ? <Skeleton className="size-14 rounded-[17px]" /> : <Avatar name={h.name || h.ownerName} src={h.profile} size="lg" />}
+        {first ? <Skeleton className="size-14 rounded-xl" /> : <Avatar name={h.name || h.ownerName} src={h.profile} size="lg" />}
         <div className="min-w-0 flex-1">
           {first ? <><Skeleton className="h-7 w-64 mb-2" /><Skeleton className="h-4 w-96 max-w-full" /></> : (
             <>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl font-extrabold tracking-[-0.03em]">{h.name || 'Unnamed hospital'}</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{h.name || 'Unnamed hospital'}</h1>
                 <ActiveBadge active={h.isActive} />
                 {h.type && <Badge tone="accent" dot={false}>{h.type}</Badge>}
               </div>
@@ -71,19 +119,55 @@ export default function HospitalDetail() {
         )}
       </Card>
 
+      <Card className="mt-4.5">
+        <div className="p-3 flex items-center gap-3 flex-wrap">
+          <div className="overflow-x-auto max-w-full">
+            <Segmented value={period.range} onChange={period.setRange} options={PERIODS} />
+          </div>
+          <div className="ml-auto text-[13px] text-ink-2 flex items-center gap-1.5">
+            <CalendarDays size={15} className="text-ink-3" />
+            Showing <b className="text-ink font-semibold">{shown}</b>
+          </div>
+        </div>
+        {period.range === 'custom' && (
+          // Input is always w-full, so each date gets a fixed-width wrapper.
+          <div className="flex items-end gap-3 flex-wrap px-3 pt-3 pb-3.5 border-t border-line">
+            <label className="w-44">
+              <span className="block text-xs font-medium text-ink-3 mb-1">From</span>
+              <Input type="date" value={period.custom.from} max={period.custom.to || localISODate()} onChange={(e) => period.setCustom('from', e.target.value)} />
+            </label>
+            <label className="w-44">
+              <span className="block text-xs font-medium text-ink-3 mb-1">To</span>
+              <Input type="date" value={period.custom.to} min={period.custom.from || undefined} max={localISODate()} onChange={(e) => period.setCustom('to', e.target.value)} />
+            </label>
+            {period.invalid && <span className="text-[13px] text-warn font-medium pb-2.5">{period.invalid}</span>}
+          </div>
+        )}
+      </Card>
+
+      <div className={`transition-opacity ${refreshing ? 'opacity-60' : ''}`} aria-busy={refreshing}>
       <div className="grid gap-3 sm:gap-4.5 mt-4.5 grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={CalendarCheck} label="Appointments today" value={fmtNum(s.todaysAppointments)} loading={first} tone="var(--sa-info)" foot={<span><b>{fmtNum(s.totalAppointments)}</b> all time</span>} />
-        <StatCard icon={Users} label="Unique patients" value={fmtNum(s.uniquePatients)} loading={first} tone="var(--sa-cyan)" foot={<span>by mobile number</span>} />
-        <StatCard icon={Stethoscope} label="Doctors" value={fmtNum(s.doctors)} loading={first} tone="var(--sa-violet)" foot={<span><b>{fmtNum((data?.doctors || []).filter((d) => d.isAvailable !== false).length)}</b> available now</span>} />
-        <StatCard icon={BedDouble} label="Admitted in IPD" value={fmtNum(s.admittedIpdPatients)} loading={first} tone="var(--sa-accent)" foot={<span>currently admitted</span>} />
+        <StatCard
+          icon={CalendarCheck} label="Appointments" value={fmtNum(p.appointments)} loading={first} tone="var(--sa-info)"
+          foot={<span><b>{fmtNum(p.emergencies)}</b> emergency{activeBody.fromDate && <> · <b>{fmtNum(s.totalAppointments)}</b> all time</>}</span>}
+        />
+        <StatCard icon={Users} label="Patients" value={fmtNum(p.uniquePatients)} loading={first} tone="var(--sa-cyan)" foot={<span>unique, by mobile number</span>} />
+        <StatCard
+          icon={Stethoscope} label="Doctors" value={fmtNum(s.doctors)} loading={first} tone="var(--sa-violet)"
+          foot={<span><b>{fmtNum(p.activeDoctors)}</b> saw patients {inPeriod}</span>}
+        />
+        <StatCard
+          icon={BedDouble} label="IPD admissions" value={fmtNum(p.ipdAdmissions)} loading={first} tone="var(--sa-accent)"
+          foot={<span><b>{fmtNum(p.ipdDischarges)}</b> discharged · <b>{fmtNum(s.admittedIpdPatients)}</b> admitted now</span>}
+        />
       </div>
 
       <div className="grid gap-4.5 mt-4.5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <Card className="p-5.5">
-          <CardHead title="Appointment status" sub="All of this hospital’s appointments" />
+          <CardHead title="Appointment status" sub={activeBody.fromDate ? `Visits in ${shown}` : 'All of this hospital’s appointments'} />
           {first
             ? <div className="flex flex-col gap-4">{STATUS_ORDER.map((st) => <Skeleton key={st} className="h-7" />)}</div>
-            : <BarList items={STATUS_ORDER.map((st) => ({ key: st, label: <StatusBadge status={st} />, value: s.byStatus?.[st] || 0 }))} />}
+            : <BarList items={STATUS_ORDER.map((st) => ({ key: st, label: <StatusBadge status={st} />, value: p.byStatus?.[st] || 0 }))} empty="No visits in this period" />}
           {specs.length > 0 && (
             <>
               <div className="text-[11.5px] text-ink-3 font-bold uppercase tracking-[0.06em] mt-6 mb-2">Specializations</div>
@@ -110,6 +194,10 @@ export default function HospitalDetail() {
                     <div className="font-bold truncate">{d.name}</div>
                     <div className="text-xs text-ink-3 truncate">{[d.department, d.degree, d.experience && `${d.experience} yrs`].filter(Boolean).join(' · ') || '—'}</div>
                   </div>
+                  <div className="text-right shrink-0 w-20">
+                    <div className="font-semibold tabular-nums">{fmtNum(d.periodAppointments)}</div>
+                    <div className="text-xs text-ink-3">{d.periodAppointments === 1 ? 'visit' : 'visits'}</div>
+                  </div>
                   <div className="text-right shrink-0">
                     <Badge tone={d.isAvailable === false ? 'muted' : 'good'}>{d.isAvailable === false ? 'Away' : 'Available'}</Badge>
                     {d.appointmentCharge && <div className="text-xs text-ink-3 mt-1 tabular-nums">{fmtMoney(d.appointmentCharge)} / visit</div>}
@@ -122,15 +210,16 @@ export default function HospitalDetail() {
       </div>
 
       <Card className="overflow-hidden mt-4.5">
-        <div className="px-5.5 pt-5.5"><CardHead title="Latest appointments" sub="The 10 most recent visits">
-          <Link to={`/appointments?hospitalId=${id}`} className="inline-flex items-center gap-1 text-[12.5px] font-bold text-accent-ink hover:underline">
+        <div className="px-5.5 pt-5.5"><CardHead title="Latest appointments" sub={`The 10 most recent visits · ${shown}`}>
+          <Link to={`/appointments?hospitalId=${id}${rangeQuery}`} className="inline-flex items-center gap-1 text-[12.5px] font-bold text-accent-ink hover:underline">
             See all <ArrowUpRight size={14} />
           </Link>
         </CardHead></div>
         {!first && (data.recentAppointments || []).length === 0
-          ? <Empty icon={CalendarCheck} title="No appointments yet" />
+          ? <Empty icon={CalendarCheck} title={activeBody.fromDate ? 'No appointments in this period' : 'No appointments yet'} />
           : <AppointmentRows rows={data?.recentAppointments} loading={first} showHospital={false} onOpen={(a) => setOpenAppt(a.appointmentId)} />}
       </Card>
+      </div>
 
       {openAppt && <AppointmentDrawer appointmentId={openAppt} onClose={() => setOpenAppt(null)} />}
       {dialogs}

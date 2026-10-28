@@ -1,33 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CalendarX2, Siren } from 'lucide-react';
+import { CalendarDays, CalendarX2, Siren } from 'lucide-react';
 import { useDebounced, useHospitalOptions, useList } from '../lib/hooks';
 import { STATUS_META, STATUS_ORDER, localISODate } from '../lib/format';
+import { PERIODS, fmtPeriod, periodRange, tzOffsetMinutes } from '../lib/periods';
 import { Card, Empty, ErrorState, Input, Pager, PageHead, SearchInput, Segmented, Select, Toolbar, cx } from '../components/ui';
 import { AppointmentDrawer, AppointmentRows } from '../components/Appointments';
-
-const PRESETS = [
-  { value: 'all', label: 'All time' },
-  { value: 'today', label: 'Today' },
-  { value: '7d', label: '7 days' },
-  { value: '30d', label: '30 days' },
-  { value: 'custom', label: 'Custom' },
-];
-
-const presetRange = (p) => ({
-  today: [localISODate(), localISODate()],
-  '7d': [localISODate(-6), localISODate()],
-  '30d': [localISODate(-29), localISODate()],
-}[p] || ['', '']);
 
 export default function Appointments() {
   const [params] = useSearchParams();
   const hospitals = useHospitalOptions();
   const [search, setSearch] = useState('');
-  const [preset, setPreset] = useState('all');
+  // A date range can arrive in the URL (e.g. "See all" from a hospital profile).
+  const [preset, setPreset] = useState(() => (params.get('fromDate') || params.get('toDate') ? 'custom' : 'all'));
   const [openId, setOpenId] = useState(null);
   const list = useList('superadmin/appointments/list', {
-    hospitalId: params.get('hospitalId') || '', status: '', search: '', fromDate: '', toDate: '', isEmergency: '',
+    hospitalId: params.get('hospitalId') || '', status: '', search: '',
+    fromDate: params.get('fromDate') || '', toDate: params.get('toDate') || '', isEmergency: '',
+    tzOffsetMinutes: tzOffsetMinutes(),
   });
   const debounced = useDebounced(search);
   useEffect(() => { list.setFilter('search', debounced); }, [debounced]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -35,7 +25,7 @@ export default function Appointments() {
   const choosePreset = (p) => {
     setPreset(p);
     if (p === 'custom') return;
-    const [from, to] = presetRange(p);
+    const [from, to] = periodRange(p);
     list.setFilter('fromDate', from);
     list.setFilter('toDate', to);
   };
@@ -69,23 +59,38 @@ export default function Appointments() {
             aria-pressed={filters.isEmergency === true}
             onClick={() => list.setFilter('isEmergency', filters.isEmergency === true ? '' : true)}
             className={cx(
-              'inline-flex items-center gap-2 h-[42px] px-3.5 rounded-xl border text-[13px] font-bold cursor-pointer transition',
-              filters.isEmergency === true ? 'text-bad border-bad/40 bg-bad/10' : 'text-ink-2 border-field-border bg-field hover:border-ink-3'
+              'inline-flex items-center gap-2 h-10 px-3.5 rounded-lg border text-[13px] font-semibold cursor-pointer transition-colors',
+              filters.isEmergency === true ? 'text-bad border-bad/40 bg-bad/10' : 'text-ink-2 border-field-border bg-field hover:bg-hover'
             )}
           >
             <Siren size={15} /> Emergency only
           </button>
         </Toolbar>
-        <div className="flex items-center gap-2.5 flex-wrap px-3.5 py-3 border-b border-line">
-          <Segmented value={preset} onChange={choosePreset} options={PRESETS} />
-          {preset === 'custom' && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Input type="date" className="w-40" value={filters.fromDate} max={filters.toDate || undefined} onChange={(e) => list.setFilter('fromDate', e.target.value)} aria-label="From date" />
-              <span className="text-ink-3">to</span>
-              <Input type="date" className="w-40" value={filters.toDate} min={filters.fromDate || undefined} onChange={(e) => list.setFilter('toDate', e.target.value)} aria-label="To date" />
-            </div>
-          )}
+        <div className="flex items-center gap-3 flex-wrap px-3.5 py-3 border-b border-line">
+          <div className="overflow-x-auto max-w-full">
+            <Segmented value={preset} onChange={choosePreset} options={PERIODS} />
+          </div>
+          <div className="ml-auto text-[13px] text-ink-2 flex items-center gap-1.5">
+            <CalendarDays size={15} className="text-ink-3" />
+            Showing <b className="text-ink font-semibold">{fmtPeriod(filters.fromDate, filters.toDate)}</b>
+          </div>
         </div>
+        {preset === 'custom' && (
+          // Input is always w-full, so each date gets a fixed-width wrapper.
+          <div className="flex items-end gap-3 flex-wrap px-3.5 pt-3 pb-3.5 border-b border-line">
+            <label className="w-44">
+              <span className="block text-xs font-medium text-ink-3 mb-1">From</span>
+              <Input type="date" value={filters.fromDate} max={filters.toDate || localISODate()} onChange={(e) => list.setFilter('fromDate', e.target.value)} />
+            </label>
+            <label className="w-44">
+              <span className="block text-xs font-medium text-ink-3 mb-1">To</span>
+              <Input type="date" value={filters.toDate} min={filters.fromDate || undefined} onChange={(e) => list.setFilter('toDate', e.target.value)} />
+            </label>
+            {filters.fromDate && filters.toDate && filters.fromDate > filters.toDate && (
+              <span className="text-[13px] text-warn font-medium pb-2.5">The start date must be on or before the end date.</span>
+            )}
+          </div>
+        )}
 
         {list.error && !list.data ? <ErrorState message={list.error} onRetry={list.reload} /> : (
           <>

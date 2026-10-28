@@ -85,7 +85,7 @@ export function AppointmentDrawer({ appointmentId, onClose }) {
           </div>
 
           <SectionTitle icon={User}>Patient</SectionTitle>
-          <div className="rounded-[14px] bg-hover border border-line px-4 py-3.5">
+          <div className="rounded-lg bg-hover border border-line px-4 py-3.5">
             <KV items={[
               ['Name', a.fullName || a.userId?.fullName],
               ['Mobile', a.mobileNumber || a.userId?.mobileNumber],
@@ -96,7 +96,7 @@ export function AppointmentDrawer({ appointmentId, onClose }) {
           </div>
 
           <SectionTitle icon={Building2}>Hospital &amp; doctor</SectionTitle>
-          <div className="rounded-[14px] bg-hover border border-line px-4 py-3.5">
+          <div className="rounded-lg bg-hover border border-line px-4 py-3.5">
             <KV items={[
               ['Hospital', a.hospitalId ? <Link className="text-accent-ink hover:underline" to={`/hospitals/${a.hospitalId._id}`} onClick={onClose}>{a.hospitalId.name}</Link> : null],
               ['City', a.hospitalId?.city],
@@ -111,7 +111,7 @@ export function AppointmentDrawer({ appointmentId, onClose }) {
           <div className="flex flex-col gap-3">
             {details.length === 0 && <div className="text-ink-3 text-[13px]">No visit details recorded.</div>}
             {details.map((v) => (
-              <div key={v._id} className="rounded-[14px] bg-hover border border-line px-4 py-3.5">
+              <div key={v._id} className="rounded-lg bg-hover border border-line px-4 py-3.5">
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="font-bold tabular-nums">{fmtDate(v.appointmentDate)} · {v.appointmentTime || v.startTime || '—'}</div>
                   <StatusBadge status={v.status === 'Ongoing' ? 'Booked' : v.status} />
@@ -145,7 +145,7 @@ export function AppointmentDrawer({ appointmentId, onClose }) {
             <>
               <SectionTitle icon={BedDouble}>IPD admission</SectionTitle>
               {ipd.map((s) => (
-                <div key={s._id} className="rounded-[14px] bg-hover border border-line px-4 py-3.5 mb-3">
+                <div key={s._id} className="rounded-lg bg-hover border border-line px-4 py-3.5 mb-3">
                   <KV items={[
                     ['Status', s.ipdStatus],
                     ['Admitted', fmtDateTime(s.ipdAdmissionDate)],

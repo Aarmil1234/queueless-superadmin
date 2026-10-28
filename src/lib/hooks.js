@@ -90,10 +90,10 @@ export function useHospitalOptions() {
 export const invalidateHospitalOptions = () => { hospitalOptionsCache = null; };
 
 export function useTheme() {
-  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark');
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light');
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#070b16' : '#eef2f8');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#08151e' : '#ffffff');
     try { localStorage.setItem('sa-theme', theme); } catch { /* ignore */ }
   }, [theme]);
   return [theme, () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))];

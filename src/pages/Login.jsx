@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Activity, Building2, Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { Activity, Building2, Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { api, isTokenValid, session } from '../lib/api';
 import { useTheme } from '../lib/hooks';
-import { Aurora, BrandMark } from '../components/Layout';
-import { Alert, Button, Field, IconButton, IconChip, inputCls } from '../components/ui';
+import { BrandMark } from '../components/Layout';
+import { Alert, Button, Field, IconButton, inputCls } from '../components/ui';
 
 const POINTS = [
-  { icon: Building2, text: 'Register and manage hospital admins', tone: 'var(--sa-accent)' },
-  { icon: Activity, text: 'Live appointment activity across the network', tone: 'var(--sa-accent-2)' },
-  { icon: ShieldCheck, text: 'Activate, deactivate and reset access in one place', tone: 'var(--sa-violet)' },
+  { icon: Building2, text: 'Register and manage hospital admins' },
+  { icon: Activity, text: 'Live appointment activity across the network' },
+  { icon: ShieldCheck, text: 'Activate, deactivate and reset access in one place' },
 ];
 
 export default function Login() {
@@ -40,7 +40,8 @@ export default function Login() {
       const { token, role, password: _omit, ...user } = res.data || {};
       // signin also accepts hospital logins — this panel is superadmin only.
       if (role !== 'admin') {
-        setError('This panel is for super admins. Hospital accounts sign in to the hospital panel.');
+        setError('Invalid credentials');
+        // setError('This panel is for super admins. Hospital accounts sign in to the hospital panel.');
         return;
       }
       session.save(token, user);
@@ -53,33 +54,36 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center gap-12 px-5 py-10 sm:px-[6vw] xl:px-24">
-      <Aurora />
-
-      <section className="hidden lg:block max-w-[560px]">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-accent-ink bg-accent/10 border border-accent/30 mb-5.5">
-          <Sparkles size={14} /> Queueless Control Center
+    <div className="min-h-screen grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      {/* Brand panel: logo navy with a soft glow of the logo blue. */}
+      <section className="hidden lg:flex flex-col justify-between p-12 xl:p-16 text-white bg-[#0b2738] bg-[radial-gradient(circle_at_100%_0%,rgb(53_203_242/0.22),transparent_55%)]">
+        <div className="flex items-center gap-3">
+          <BrandMark className="size-10" />
+          <span className="text-lg font-bold tracking-tight">Queueless</span>
         </div>
-        <h1 className="text-[clamp(34px,4.4vw,54px)] font-extrabold tracking-[-0.045em] leading-[1.04]">
-          Every hospital.<br />
-          <span className="text-brand">One clear view.</span>
-        </h1>
-        <p className="text-base text-ink-2 mt-4.5 mb-7.5 max-w-[470px]">
-          Onboard hospitals, manage their admin access and see appointments across the whole network as they happen.
-        </p>
-        <div className="grid gap-3.5">
-          {POINTS.map(({ icon, text, tone }) => (
-            <div key={text} className="flex items-center gap-3.5 font-semibold text-ink-2" style={{ '--tone': tone }}>
-              <IconChip icon={icon} size="sm" />
-              {text}
-            </div>
-          ))}
+        <div className="max-w-[480px]">
+          <h1 className="text-[clamp(30px,3.2vw,42px)] font-bold tracking-tight leading-[1.15]">
+            Every hospital. <span className="text-[#35cbf2]">One clear view.</span>
+          </h1>
+          <p className="text-[15px] text-white/70 mt-4 mb-8 leading-relaxed">
+            Onboard hospitals, manage their admin access and see appointments across the whole network as they happen.
+          </p>
+          <div className="grid gap-3.5">
+            {POINTS.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-3 text-white/85">
+                <span className="size-9 rounded-lg grid place-items-center bg-white/8 text-[#35cbf2]"><Icon size={17} /></span>
+                {text}
+              </div>
+            ))}
+          </div>
         </div>
+        <p className="text-xs text-white/45">Super admin control panel</p>
       </section>
 
-      <div className="glass rounded-[22px] w-full max-w-[440px] justify-self-center p-6.5 sm:p-8.5">
-        <BrandMark className="mb-5" />
-        <h2 className="text-2xl font-extrabold">Welcome back</h2>
+      <div className="grid place-items-center px-5 py-10">
+      <div className="glass rounded-xl w-full max-w-[420px] p-6.5 sm:p-8">
+        <BrandMark className="mb-5 lg:hidden" />
+        <h2 className="text-2xl font-bold">Welcome back</h2>
         <p className="text-ink-2 mt-1">Sign in with your super admin account.</p>
 
         <form onSubmit={submit} noValidate className="flex flex-col gap-4 mt-6">
@@ -119,10 +123,11 @@ export default function Login() {
               />
             </div>
           </Field>
-          <Button variant="primary" type="submit" loading={loading} disabled={!loginField || !password} className="h-11.5 mt-1.5">
+          <Button variant="primary" type="submit" loading={loading} disabled={!loginField || !password} className="h-11 mt-1.5">
             Sign in
           </Button>
         </form>
+      </div>
       </div>
     </div>
   );

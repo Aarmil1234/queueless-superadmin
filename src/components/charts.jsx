@@ -9,9 +9,9 @@ function ChartTip({ active, payload, label, unit }) {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="glass-solid rounded-xl px-3 py-2.5 text-[12.5px]">
+    <div className="glass-solid rounded-lg px-3 py-2.5 text-[12.5px]">
       <div className="text-ink-3 font-semibold mb-0.5">{p.tipLabel || label}</div>
-      <div className="font-extrabold text-ink tabular-nums">{fmtNum(payload[0].value)} {unit}</div>
+      <div className="font-bold text-ink tabular-nums">{fmtNum(payload[0].value)} {unit}</div>
     </div>
   );
 }
@@ -27,7 +27,7 @@ export function TrendChart({ data, xKey, yKey, unit = 'appointments', height = 2
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <defs>
             <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={c.chart} stopOpacity={0.35} />
+              <stop offset="0%" stopColor={c.chart} stopOpacity={0.18} />
               <stop offset="100%" stopColor={c.chart} stopOpacity={0} />
             </linearGradient>
           </defs>
@@ -61,7 +61,7 @@ export function BarList({ items, empty = 'No data yet' }) {
       {items.map((item) => (
         <div key={item.key} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 items-center" title={`${item.title || item.key}: ${fmtNum(item.value)}`}>
           <div className="text-[13px] font-semibold flex items-center gap-2 min-w-0">{item.label}</div>
-          <div className="text-[13px] font-extrabold tabular-nums">{fmtNum(item.value)}</div>
+          <div className="text-[13px] font-bold tabular-nums">{fmtNum(item.value)}</div>
           <div className="col-span-2 h-2 rounded-full bg-hover overflow-hidden">
             <div
               className={cx('h-full rounded-full bg-chart transition-[width] duration-700 ease-out', item.value === 0 && 'opacity-0')}

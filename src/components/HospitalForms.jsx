@@ -17,7 +17,7 @@ export const generatePassword = () => {
 
 function SectionLabel({ children }) {
   return (
-    <div className="sm:col-span-2 flex items-center gap-2.5 pt-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-3 after:content-[''] after:flex-1 after:h-px after:bg-line">
+    <div className="sm:col-span-2 flex items-center gap-2.5 pt-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-ink-3 after:content-[''] after:flex-1 after:h-px after:bg-line">
       {children}
     </div>
   );
@@ -171,10 +171,10 @@ export function HospitalFormModal({ hospital, onClose, onSaved }) {
         footer={<Button variant="primary" onClick={onClose}>Done</Button>}
       >
         <div className="flex flex-col items-center text-center gap-2 mb-5">
-          <div className="size-14 rounded-[18px] grid place-items-center bg-good/10 text-good border border-good/25"><PartyPopper size={26} /></div>
+          <div className="size-14 rounded-xl grid place-items-center bg-good/10 text-good border border-good/25"><PartyPopper size={26} /></div>
           <p className="text-ink-2">The hospital admin can sign in to the hospital panel with these details. Share them securely — the password isn’t shown again.</p>
         </div>
-        <div className="rounded-2xl bg-hover border border-line p-4 font-mono text-[13px] leading-7">
+        <div className="rounded-xl bg-hover border border-line p-4 font-mono text-[13px] leading-7">
           <div><span className="text-ink-3">Login&nbsp;&nbsp;&nbsp;</span> {created.email}</div>
           <div><span className="text-ink-3">Mobile&nbsp;&nbsp;</span> {created.mobileNumber}</div>
           <div><span className="text-ink-3">Password</span> {created.password}</div>
@@ -203,13 +203,13 @@ export function HospitalFormModal({ hospital, onClose, onSaved }) {
         {serverError && <div className="sm:col-span-2"><Alert>{serverError}</Alert></div>}
 
         <div
-          className="sm:col-span-2 flex items-center gap-3.5 p-3.5 rounded-[14px] border-[1.5px] border-dashed border-field-border bg-field cursor-pointer transition hover:border-accent hover:bg-accent/5"
+          className="sm:col-span-2 flex items-center gap-3.5 p-3.5 rounded-lg border-[1.5px] border-dashed border-field-border bg-field cursor-pointer transition hover:border-accent hover:bg-accent/5"
           onClick={() => fileRef.current?.click()}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && fileRef.current?.click()}
         >
-          <div className="size-13 rounded-[13px] grid place-items-center bg-hover text-ink-3 overflow-hidden shrink-0">
+          <div className="size-13 rounded-lg grid place-items-center bg-hover text-ink-3 overflow-hidden shrink-0">
             {preview ? <img src={preview} alt="" className="size-full object-cover" /> : <ImagePlus size={22} />}
           </div>
           <div className="min-w-0">
@@ -343,7 +343,7 @@ export function ResetPasswordModal({ hospital, onClose }) {
       {done ? (
         <>
           <p className="text-ink-2 mb-4">Share the new password with the hospital admin. Their old password no longer works.</p>
-          <div className="rounded-2xl bg-hover border border-line p-4 font-mono text-[13px] leading-7">
+          <div className="rounded-xl bg-hover border border-line p-4 font-mono text-[13px] leading-7">
             <div><span className="text-ink-3">Login&nbsp;&nbsp;&nbsp;</span> {hospital.email || hospital.mobileNumber}</div>
             <div><span className="text-ink-3">Password</span> {password}</div>
           </div>

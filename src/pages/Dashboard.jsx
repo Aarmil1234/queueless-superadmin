@@ -84,7 +84,7 @@ export default function Dashboard() {
               View all <ArrowUpRight size={14} />
             </Link>
           </CardHead>
-          {loading && !data ? <Skeleton className="h-[270px] w-full rounded-2xl" /> : (
+          {loading && !data ? <Skeleton className="h-[270px] w-full rounded-xl" /> : (
             <TrendChart
               data={(d.weeklyData || []).map((w) => ({ ...w, tipLabel: new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }).format(new Date(`${w.date}T00:00`)) }))}
               xKey="day"

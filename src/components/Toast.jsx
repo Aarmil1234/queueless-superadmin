@@ -30,7 +30,7 @@ export function ToastProvider({ children }) {
           {toasts.map((t) => {
             const { icon: Icon, cls } = META[t.tone] || META.info;
             return (
-              <div key={t.id} className="glass-solid rounded-2xl flex items-start gap-3 px-4 py-3.5 font-semibold animate-slide-in" role={t.tone === 'bad' ? 'alert' : 'status'}>
+              <div key={t.id} className="glass-solid rounded-lg flex items-start gap-3 px-4 py-3.5 font-medium animate-slide-in" role={t.tone === 'bad' ? 'alert' : 'status'}>
                 <Icon size={18} className={`${cls} shrink-0 mt-px`} />
                 <div className="flex-1 min-w-0">{t.message}</div>
                 <IconButton icon={X} label="Dismiss" size="sm" plain className="-my-1.5 -mr-1.5" onClick={() => dismiss(t.id)} />
